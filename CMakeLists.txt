@@ -38,8 +38,8 @@ if (CMAKE_VERSION VERSION_LESS "3.21")
     string(COMPARE EQUAL ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR} PROJECT_IS_TOP_LEVEL)
 endif()
 
-set(GLSLANG_TESTS_DEFAULT ON) # Can be turned off, below, based on environment.
-set(GLSLANG_ENABLE_INSTALL_DEFAULT ON) # Can be turned off, below, based on environment.
+set(GLSLANG_TESTS_DEFAULT OFF) # Can be turned off, below, based on environment.
+set(GLSLANG_ENABLE_INSTALL_DEFAULT OFF) # Can be turned off, below, based on environment.
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -50,7 +50,7 @@ include(CMakePackageConfigHelpers)
 # Needed for CMAKE_DEPENDENT_OPTION macro
 include(CMakeDependentOption)
 
-option(BUILD_SHARED_LIBS "Build Shared Libraries")
+option(BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
 option(BUILD_EXTERNAL "Build external dependencies in /External" ON)
 option(BUILD_WERROR "Enable warnings as errors (default is OFF)" OFF)
 
@@ -97,9 +97,9 @@ option(GLSLANG_TESTS "Enable glslang testing" ${GLSLANG_TESTS_DEFAULT})
 # Always expose this as an option, so the defaults can be overridden.
 option(GLSLANG_ENABLE_INSTALL "Enable glslang installation" ${GLSLANG_ENABLE_INSTALL_DEFAULT})
 
-option(ENABLE_SPVREMAPPER "Enables building of SPVRemapper" ON)
+option(ENABLE_SPVREMAPPER "Enables building of SPVRemapper" OFF)
 
-option(ENABLE_GLSLANG_BINARIES "Builds glslang and spirv-remap" ON)
+option(ENABLE_GLSLANG_BINARIES "Builds glslang and spirv-remap" OFF)
 
 option(ENABLE_GLSLANG_JS "If using Emscripten, build glslang.js. Otherwise, builds a sample executable for binary-size testing.")
 CMAKE_DEPENDENT_OPTION(ENABLE_EMSCRIPTEN_SINGLE_FILE
@@ -113,8 +113,8 @@ CMAKE_DEPENDENT_OPTION(ENABLE_EMSCRIPTEN_ENVIRONMENT_NODE
 
 option(ENABLE_HLSL "Enables HLSL input support" ON)
 option(ENABLE_RTTI "Enables RTTI")
-option(ENABLE_EXCEPTIONS "Enables Exceptions")
-option(ENABLE_OPT "Enables spirv-opt capability if present" ON)
+option(ENABLE_EXCEPTIONS "Enables Exceptions" OFF)
+option(ENABLE_OPT "Enables spirv-opt capability if present" OFF)
 
 if(MINGW OR (APPLE AND ${CMAKE_CXX_COMPILER_ID} MATCHES "GNU"))
     # Workaround for CMake behavior on Mac OS with gcc, cmake generates -Xarch_* arguments
