@@ -38,7 +38,7 @@ target_sources(OSDependent PRIVATE
     ossource.cpp
 )
 
-set_property(TARGET OSDependent PROPERTY FOLDER glslang)
+set_property(TARGET OSDependent PROPERTY FOLDER ${GLSLANG_FOLDER})
 set_property(TARGET OSDependent PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # MinGW GCC complains about function pointer casts to void*.

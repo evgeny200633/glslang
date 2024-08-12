@@ -82,7 +82,7 @@ set(PUBLIC_HEADERS
 add_library(SPIRV ${LIB_TYPE} ${SOURCES} ${HEADERS})
 add_library(glslang::SPIRV ALIAS SPIRV)
 set_target_properties(SPIRV PROPERTIES
-    FOLDER glslang
+    FOLDER ${GLSLANG_FOLDER}
     POSITION_INDEPENDENT_CODE ON
     VERSION   "${GLSLANG_VERSION}"
     SOVERSION "${GLSLANG_VERSION_MAJOR}")
@@ -96,7 +96,7 @@ if (ENABLE_SPVREMAPPER)
     add_library(SPVRemapper ${LIB_TYPE} ${SPVREMAP_SOURCES} ${SPVREMAP_HEADERS})
     add_library(glslang::SPVRemapper ALIAS SPVRemapper)
     set_target_properties(SPVRemapper PROPERTIES
-        FOLDER glslang
+        FOLDER ${GLSLANG_FOLDER}
         POSITION_INDEPENDENT_CODE ON
         VERSION   "${GLSLANG_VERSION}"
         SOVERSION "${GLSLANG_VERSION_MAJOR}")

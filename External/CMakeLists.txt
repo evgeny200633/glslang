@@ -51,7 +51,7 @@ if(GLSLANG_TESTS)
             gmock
             gmock_main)
         foreach(target ${GTEST_TARGETS})
-            set_property(TARGET ${target} PROPERTY FOLDER gtest)
+            set_property(TARGET ${target} PROPERTY FOLDER ${GLSLANG_FOLDER})
         endforeach()
         mark_as_advanced(gmock_build_tests
             BUILD_GMOCK

@@ -66,7 +66,7 @@ if(GLSLANG_TESTS)
 
         add_executable(glslangtests ${TEST_SOURCES})
         glslang_pch(glslangtests ${CMAKE_CURRENT_SOURCE_DIR}/pch.h)
-        set_property(TARGET glslangtests PROPERTY FOLDER tests)
+        set_property(TARGET glslangtests PROPERTY FOLDER ${GLSLANG_FOLDER}/tests)
         glslang_set_link_args(glslangtests)
 
         set(GLSLANG_TEST_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../Test")

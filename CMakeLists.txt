@@ -43,6 +43,8 @@ set(GLSLANG_ENABLE_INSTALL_DEFAULT OFF) # Can be turned off, below, based on env
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(GLSLANG_FOLDER "Third Party/glslang")
+
 # Adhere to GNU filesystem layout conventions
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
