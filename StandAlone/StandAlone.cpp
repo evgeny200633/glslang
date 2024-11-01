@@ -44,12 +44,10 @@
 #include "glslang/Public/ResourceLimits.h"
 #include "Worklist.h"
 #include "DirStackFileIncluder.h"
-#include "./../glslang/Include/ShHandle.h"
 #include "./../glslang/Public/ShaderLang.h"
 #include "../glslang/MachineIndependent/localintermediate.h"
 #include "../SPIRV/GlslangToSpv.h"
 #include "../SPIRV/GLSL.std.450.h"
-#include "../SPIRV/doc.h"
 #include "../SPIRV/disassemble.h"
 
 #include <array>
@@ -111,6 +109,7 @@ enum TOptions : uint64_t {
     EOptionDumpBareVersion = (1ull << 31),
     EOptionCompileOnly = (1ull << 32),
     EOptionDisplayErrorColumn = (1ull << 33),
+    EOptionLinkTimeOptimization = (1ull << 34),
 };
 bool targetHlslFunctionality1 = false;
 bool SpvToolsDisassembler = false;
@@ -901,6 +900,8 @@ void ProcessArguments(std::vector<std::unique_ptr<glslang::TWorkItem>>& workItem
                         Options |= EOptionCompileOnly;
                     } else if (lowerword == "error-column") {
                         Options |= EOptionDisplayErrorColumn;
+                    } else if (lowerword == "lto") {
+                        Options |= EOptionLinkTimeOptimization;
                     } else if (lowerword == "help") {
                         usage();
                         break;
@@ -1085,6 +1086,10 @@ void ProcessArguments(std::vector<std::unique_ptr<glslang::TWorkItem>>& workItem
     if ((Options & EOptionDumpReflection) && !(Options & EOptionLinkProgram))
         Error("reflection requires -l for linking");
 
+    // link time optimization makes no sense unless linking
+    if ((Options & EOptionLinkTimeOptimization) && !(Options & EOptionLinkProgram))
+        Error("link time optimization requires -l for linking");
+
     // -o or -x makes no sense if there is no target binary
     if (binaryFileName && (Options & EOptionSpv) == 0)
         Error("no binary generation requested (e.g., -V)");
@@ -1169,6 +1174,8 @@ void SetMessageOptions(EShMessages& messages)
         messages = (EShMessages)(messages | EShMsgAbsolutePath);
     if (Options & EOptionDisplayErrorColumn)
         messages = (EShMessages)(messages | EShMsgDisplayErrorColumn);
+    if (Options & EOptionLinkTimeOptimization)
+        messages = (EShMessages)(messages | EShMsgLinkTimeOptimization);
 }
 
 //
@@ -1511,6 +1518,7 @@ void CompileAndLinkShaderUnits(std::vector<ShaderCompUnit> compUnits)
 
     // Dump SPIR-V
     if (Options & EOptionSpv) {
+#ifdef ENABLE_SPIRV
         CompileOrLinkFailed.fetch_or(CompileFailed);
         CompileOrLinkFailed.fetch_or(LinkFailed);
         if (static_cast<bool>(CompileOrLinkFailed.load()))
@@ -1570,6 +1578,9 @@ void CompileAndLinkShaderUnits(std::vector<ShaderCompUnit> compUnits)
                 }
             }
         }
+#else
+        Error("This configuration of glslang does not have SPIR-V support");
+#endif
     }
 
     CompileOrLinkFailed.fetch_or(CompileFailed);
@@ -1669,21 +1680,31 @@ int singleMain()
     }
 
     if (Options & EOptionDumpBareVersion) {
-        printf("%d:%d.%d.%d%s\n", glslang::GetSpirvGeneratorVersion(), GLSLANG_VERSION_MAJOR, GLSLANG_VERSION_MINOR,
+        int spirvGeneratorVersion = 0;
+#ifdef ENABLE_SPIRV
+        spirvGeneratorVersion = glslang::GetSpirvGeneratorVersion();
+#endif
+        printf("%d:%d.%d.%d%s\n", spirvGeneratorVersion, GLSLANG_VERSION_MAJOR, GLSLANG_VERSION_MINOR,
                 GLSLANG_VERSION_PATCH, GLSLANG_VERSION_FLAVOR);
         if (workList.empty())
             return ESuccess;
     } else if (Options & EOptionDumpVersions) {
-        printf("Glslang Version: %d:%d.%d.%d%s\n", glslang::GetSpirvGeneratorVersion(), GLSLANG_VERSION_MAJOR,
+        int spirvGeneratorVersion = 0;
+#ifdef ENABLE_SPIRV
+        spirvGeneratorVersion = glslang::GetSpirvGeneratorVersion();
+#endif
+        printf("Glslang Version: %d:%d.%d.%d%s\n", spirvGeneratorVersion, GLSLANG_VERSION_MAJOR,
                 GLSLANG_VERSION_MINOR, GLSLANG_VERSION_PATCH, GLSLANG_VERSION_FLAVOR);
         printf("ESSL Version: %s\n", glslang::GetEsslVersionString());
         printf("GLSL Version: %s\n", glslang::GetGlslVersionString());
         std::string spirvVersion;
+#if ENABLE_SPIRV
         glslang::GetSpirvVersion(spirvVersion);
+#endif
         printf("SPIR-V Version %s\n", spirvVersion.c_str());
         printf("GLSL.std.450 Version %d, Revision %d\n", GLSLstd450Version, GLSLstd450Revision);
         printf("Khronos Tool ID %d\n", glslang::GetKhronosToolId());
-        printf("SPIR-V Generator Version %d\n", glslang::GetSpirvGeneratorVersion());
+        printf("SPIR-V Generator Version %d\n", spirvGeneratorVersion);
         printf("GL_KHR_vulkan_glsl version %d\n", 100);
         printf("ARB_GL_gl_spirv version %d\n", 100);
         if (workList.empty())
@@ -2123,7 +2144,8 @@ void usage()
            "                                    initialized with the shader binary code\n"
            "  --no-link                         Only compile shader; do not link (GLSL-only)\n"
            "                                    NOTE: this option will set the export linkage\n"
-           "                                          attribute on all functions\n");
+           "                                          attribute on all functions\n"
+           "  --lto                             perform link time optimization\n");
 
     exit(EFailUsage);
 }

@@ -43,8 +43,6 @@
 #include "../MachineIndependent/Scan.h"
 #include "../MachineIndependent/preprocessor/PpContext.h"
 
-#include "../OSDependent/osinclude.h"
-
 #include <algorithm>
 #include <functional>
 #include <cctype>
@@ -1441,7 +1439,7 @@ int HlslParseContext::findSubtreeOffset(const TType& type, int subset, const TVe
         return offsets[subset];
     TType derefType(type, 0);
     return findSubtreeOffset(derefType, offsets[subset], offsets);
-};
+}
 
 // Find and return the split IO TVariable for id, or nullptr if none.
 TVariable* HlslParseContext::getSplitNonIoVar(long long id) const
